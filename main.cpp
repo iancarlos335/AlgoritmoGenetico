@@ -6,11 +6,9 @@
 #include <ctime>
 using namespace std;
 
-int numeroDeGeracoes = 0;
 const int maxIndividuos = 1000;
-int quantidadeIndividuos = 1000;
 
-void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int &d, int &e, int &f)
+void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int &d, int &e, int &f, int &quantidadeIndividuos, int &numeroDeGeracoes)
 {
     while (true)
     {
@@ -70,7 +68,7 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
 
 void crossOver(int individuos[maxIndividuos])
 {
-    // S;
+    // individuos
 }
 
 long long int validar(int a, int b, int c, int d, int e, int f, int x)
@@ -91,7 +89,7 @@ bitset<32> passibilidadeDeMutacao(bitset<32> conteudoBit)
     return conteudoBit;
 }
 
-void separacao(int individuos[maxIndividuos])
+void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int numeroDeGeracoes)
 {
     int taxaDeSeparação = quantidadeIndividuos * 0.5 + 1;
 
@@ -103,7 +101,7 @@ void separacao(int individuos[maxIndividuos])
     cout << endl;
 }
 
-void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f)
+void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes)
 {
     long long int resultado;
 
@@ -112,16 +110,16 @@ void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d,
         for (int individuoAtual = 0; individuoAtual < quantidadeIndividuos; individuoAtual++)
         {
             resultado = validar(a, b, c, d, e, f, individuos[individuoAtual]);
-            if (resultado == 0)
+            if (resultado == 0 || resultado == 1 || resultado == -1)
             {
                 cout << "Valor do indivíduo: " << individuos[individuoAtual] << endl
                      << "Com o indivíduo: " << individuoAtual << endl
                      << "Na geração" << geracaoAtual + 1 << endl;
-                exit(EXIT_FAILURE);
+                exit(EXIT_SUCCESS);
             }
             else
             {
-                separacao(individuos);
+                separacao(individuos, quantidadeIndividuos, numeroDeGeracoes);
             }
         }
     }
@@ -131,17 +129,13 @@ int main()
 {
     srand(time(0));
     int a, b, c, d, e, f;
+    int quantidadeIndividuos = 1000, numeroDeGeracoes = 0;
     int individuos[maxIndividuos]; // Perguntar pro professor se tem problema colocar esse vetor num contexto global.
 
-    gerarIndividuos(individuos, a, b, c, d, e, f);
+    gerarIndividuos(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes);
     sort(individuos, individuos + quantidadeIndividuos); // Ordena os individuos em ordem crescente
 
-    validaSolucaoBoa(individuos, a, b, c, d, e, f);
-
-    for (int i = 0; i < quantidadeIndividuos; i++)
-    {
-        passibilidadeDeMutacao(individuos[i]);
-    }
+    validaSolucaoBoa(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes);
 
     return 0;
 }
