@@ -62,7 +62,7 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
         // Gera os individuos aletóriamente dentro do range de -2000 a 2000
         for (int i = 0; i < quantidadeIndividuos; i++)
         {
-            individuos[i] = rand() % 5;
+            individuos[i] = rand() % 2000;
         }
         break;
     }
@@ -73,8 +73,9 @@ void crossOver(int individuos[maxIndividuos])
     // S;
 }
 
-void geraRaiz()
+long long int validar(int a, int b, int c, int d, int e, int f, int x)
 {
+    return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
 }
 
 bitset<32> passibilidadeDeMutacao(bitset<32> conteudoBit)
@@ -93,28 +94,30 @@ bitset<32> passibilidadeDeMutacao(bitset<32> conteudoBit)
 void separacao(int individuos[maxIndividuos])
 {
     int taxaDeSeparação = quantidadeIndividuos * 0.5 + 1;
+
+    // Indivíduos antigos serão substituídos por novos
     for (int i = taxaDeSeparação; i < quantidadeIndividuos; i++)
     {
-        individuos[i] = rand() % 5;
+        individuos[i] = rand() % 2000;
     }
     cout << endl;
 }
 
-void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int x, long resultado)
+void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f)
 {
+    long long int resultado;
+
     for (int geracaoAtual = 0; geracaoAtual < numeroDeGeracoes; geracaoAtual++)
     {
         for (int individuoAtual = 0; individuoAtual < quantidadeIndividuos; individuoAtual++)
         {
-            x = individuos[individuoAtual];
-            cout << a * pow(x, 5);
-            resultado = (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
+            resultado = validar(a, b, c, d, e, f, individuos[individuoAtual]);
             if (resultado == 0)
             {
-                cout << "Resultado da equação: " << x << endl
+                cout << "Valor do indivíduo: " << individuos[individuoAtual] << endl
                      << "Com o indivíduo: " << individuoAtual << endl
                      << "Na geração" << geracaoAtual + 1 << endl;
-                // exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);
             }
             else
             {
@@ -127,14 +130,13 @@ void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d,
 int main()
 {
     srand(time(0));
-    int a, b, c, d, e, f, x;
-    long resultado;
+    int a, b, c, d, e, f;
     int individuos[maxIndividuos]; // Perguntar pro professor se tem problema colocar esse vetor num contexto global.
 
     gerarIndividuos(individuos, a, b, c, d, e, f);
-    sort(individuos[0], individuos[quantidadeIndividuos - 1]); // Ordena os individuos em ordem crescente
+    sort(individuos, individuos + quantidadeIndividuos); // Ordena os individuos em ordem crescente
 
-    validaSolucaoBoa(individuos, a, b, c, d, e, f, x, resultado);
+    validaSolucaoBoa(individuos, a, b, c, d, e, f);
 
     for (int i = 0; i < quantidadeIndividuos; i++)
     {
