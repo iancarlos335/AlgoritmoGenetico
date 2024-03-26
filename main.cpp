@@ -1,5 +1,4 @@
 #include <iostream>
-#include <bitset>
 #include <cstdlib>
 #include <algorithm>
 #include <cmath>
@@ -66,9 +65,14 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
     }
 }
 
-void crossOver(int individuos[maxIndividuos])
+void crossOver(int individuos[maxIndividuos], int taxaDeSeparacao)
 {
-    // individuos
+
+    // pular primeiro individuo
+    for (int i = 1; i < taxaDeSeparacao; i++)
+    {
+        mutarIndividuo(individuos[i]);
+    }
 }
 
 long long int validar(int a, int b, int c, int d, int e, int f, int x)
@@ -76,17 +80,22 @@ long long int validar(int a, int b, int c, int d, int e, int f, int x)
     return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
 }
 
-bitset<32> passibilidadeDeMutacao(bitset<32> conteudoBit)
+void mutarIndividuo(int &individuo)
 {
-    srand(time(0));
-
     int posicao = rand() % 32;
+    int taxaDeMutacao = (rand() % 2) == 0;
 
     // Lembrar de pular a mutação do último bit da posição 31 pq ele controla o sinal do número
     if (posicao != 31)
-        conteudoBit.set(posicao, (rand() % 2) == 0);
+    {
+        int mascaraDeBits = taxaDeMutacao << posicao;
 
-    return conteudoBit;
+        // Limpa o valor do bit na posição sorteada
+        individuo = individuo & ~(1 << posicao);
+
+        // Realiza a mutação
+        individuo = individuo | mascaraDeBits;
+    }
 }
 
 void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int numeroDeGeracoes)
@@ -95,9 +104,9 @@ void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int nume
 
     // Indivíduos antigos serão substituídos por novos
     for (int i = taxaDeSeparação; i < quantidadeIndividuos; i++)
-    {
         individuos[i] = rand() % 2000;
-    }
+
+    crossOver(individuos, taxaDeSeparação);
     cout << endl;
 }
 
