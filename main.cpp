@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdlib>
+#include <bitset>
 #include <algorithm>
 #include <cmath>
 #include <ctime>
@@ -65,21 +66,6 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
     }
 }
 
-void crossOver(int individuos[maxIndividuos], int taxaDeSeparacao)
-{
-
-    // pular primeiro individuo
-    for (int i = 1; i < taxaDeSeparacao; i++)
-    {
-        mutarIndividuo(individuos[i]);
-    }
-}
-
-long long int validar(int a, int b, int c, int d, int e, int f, int x)
-{
-    return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
-}
-
 void mutarIndividuo(int &individuo)
 {
     int posicao = rand() % 32;
@@ -98,6 +84,49 @@ void mutarIndividuo(int &individuo)
     }
 }
 
+void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos)
+{
+    // pular primeiro individuo
+    for (int i = 1; i < quantidadeIndividuos; i++)
+    {
+        // int primeiroIndividuo = individuos[i - 1];
+        // int segundoIndividuo = individuos[i];
+        int primeiroIndividuo = 235497234;
+        int segundoIndividuo = 859234793;
+        int primeiroIndividuoPartes[2] = {primeiroIndividuo, primeiroIndividuo};
+        int segundoIndividuoPartes[2] = {segundoIndividuo, segundoIndividuo};
+
+        int mascaraNovaGeracaoPrimeiroIndividuo;
+        int mascaraNovaGeracaoSegundoIndividuo;
+
+        // Parte da esquerda
+        for (int i = 0; i < 16; i++)
+        {
+            primeiroIndividuoPartes[1] = primeiroIndividuo & ~(1 << i);
+            segundoIndividuoPartes[1] = segundoIndividuo & ~(1 << i);
+        }
+
+        // Parte da direita
+        for (int i = 16; i < 32; i++)
+        {
+            primeiroIndividuoPartes[2] = primeiroIndividuo & ~(1 << i);
+            segundoIndividuoPartes[2] = segundoIndividuo & ~(1 << i);
+        }
+
+        mascaraDoPrimeiroIndividuo = (segundoIndividuo << 0);
+        cout << bitset<32>(segundoIndividuo) << endl;
+        cout << bitset<32>(mascaraDoPrimeiroIndividuo) << endl;
+        mascaraDoSegundoIndividuo = (primeiroIndividuo << 0);
+        cout << bitset<32>(segundoIndividuo) << endl;
+        cout << bitset<32>(mascaraDoSegundoIndividuo) << endl;
+
+        mascaraDoPrimeiroIndividuo = (segundoIndividuo >> 16);
+        mascaraDoSegundoIndividuo = (primeiroIndividuo >> 16);
+
+        mutarIndividuo(individuos[i]);
+    }
+}
+
 void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int numeroDeGeracoes)
 {
     int taxaDeSeparação = quantidadeIndividuos * 0.5 + 1;
@@ -106,8 +135,13 @@ void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int nume
     for (int i = taxaDeSeparação; i < quantidadeIndividuos; i++)
         individuos[i] = rand() % 2000;
 
-    crossOver(individuos, taxaDeSeparação);
+    crossOver(individuos, quantidadeIndividuos);
     cout << endl;
+}
+
+long long int validar(int a, int b, int c, int d, int e, int f, int x)
+{
+    return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
 }
 
 void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes)
