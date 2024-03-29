@@ -102,15 +102,15 @@ void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos)
         // Parte da esquerda
         for (int i = 0; i < 16; i++)
         {
-            primeiroIndividuoPartes[1] = primeiroIndividuo & ~(1 << i);
-            segundoIndividuoPartes[1] = segundoIndividuo & ~(1 << i);
+            primeiroIndividuoPartes[0] = primeiroIndividuo & ~(1 << i);
+            segundoIndividuoPartes[0] = segundoIndividuo & ~(1 << i);
         }
 
         // Parte da direita
         for (int i = 16; i < 32; i++)
         {
-            primeiroIndividuoPartes[2] = primeiroIndividuo & ~(1 << i);
-            segundoIndividuoPartes[2] = segundoIndividuo & ~(1 << i);
+            primeiroIndividuoPartes[1] = primeiroIndividuo & ~(1 << i);
+            segundoIndividuoPartes[1] = segundoIndividuo & ~(1 << i);
         }
 
         mascaraNovaGeracaoPrimeiroIndividuo = (segundoIndividuo << 0);
@@ -130,6 +130,10 @@ void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos)
 void separacao(int individuos[maxIndividuos], int quantidadeIndividuos)
 {
     int taxaDeSeparação = quantidadeIndividuos * 0.5 + 1;
+    for (int i = taxaDeSeparação; i < quantidadeIndividuos; i++)
+    {
+        individuos[i] = 0;
+    }
     crossOver(individuos, quantidadeIndividuos);
     cout << endl;
 }
@@ -139,23 +143,23 @@ long long int validar(int a, int b, int c, int d, int e, int f, int x)
     return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
 }
 
-void bubbleSort(long long int valores[maxIndividuos][2], int quantidadeDeIndividuos)
+void bubbleSort(long long int resultados[maxIndividuos][2], int quantidadeDeIndividuos)
 {
     for (int i = 0; i < quantidadeDeIndividuos - 1; i++)
     {
         for (int j = 0; j < quantidadeDeIndividuos - i - 1; j++)
         {
             // Se o individuo atual tiver um valor maior que o seguinte, eles trocam de posição.
-            if (valores[j][0] > valores[j + 1][0])
+            if (resultados[j][0] > resultados[j + 1][0])
             {
-                int tempValue = valores[j][0];
-                int tempIndex = valores[j][1];
+                int tempValue = resultados[j][0];
+                int tempIndex = resultados[j][1];
 
-                valores[j][0] = valores[j + 1][0];
-                valores[j][1] = valores[j + 1][1];
+                resultados[j][0] = resultados[j + 1][0];
+                resultados[j][1] = resultados[j + 1][1];
 
-                valores[j + 1][0] = tempValue;
-                valores[j + 1][1] = tempIndex;
+                resultados[j + 1][0] = tempValue;
+                resultados[j + 1][1] = tempIndex;
             }
         }
     }
@@ -163,15 +167,15 @@ void bubbleSort(long long int valores[maxIndividuos][2], int quantidadeDeIndivid
 
 void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes)
 {
-    long long int valores[maxIndividuos][2]; // Primeira dimensão é pros valores, a segunda é para o índice do individuo mais próximo da solução.
+    long long int resultados[maxIndividuos][2]; // Primeira dimensão é pros valores, a segunda é para o índice do individuo mais próximo da solução.
 
     for (int geracaoAtual = 0; geracaoAtual < numeroDeGeracoes; geracaoAtual++)
     {
         for (int individuoAtual = 0; individuoAtual < quantidadeIndividuos; individuoAtual++)
         {
-            valores[individuoAtual][0] = abs(validar(a, b, c, d, e, f, individuos[individuoAtual]));
-            valores[individuoAtual][1] = individuoAtual;
-            if (valores[individuoAtual][0] == 0)
+            resultados[individuoAtual][0] = abs(validar(a, b, c, d, e, f, individuos[individuoAtual]));
+            resultados[individuoAtual][1] = individuoAtual;
+            if (resultados[individuoAtual][0] == 0)
             {
                 cout << "Valor do indivíduo: " << individuos[individuoAtual] << endl
                      << "Com o indivíduo: " << individuoAtual << endl
@@ -182,10 +186,10 @@ void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d,
 
         if (geracaoAtual == numeroDeGeracoes - 1)
         {
-            bubbleSort(valores, quantidadeIndividuos);
+            bubbleSort(resultados, quantidadeIndividuos);
 
-            cout << "Valor do indivíduo: " << individuos[valores[0][1]] << endl
-                 << "Com o indivíduo: " << valores[0][1] << endl
+            cout << "Valor do indivíduo: " << individuos[resultados[0][1]] << endl
+                 << "Com o indivíduo: " << resultados[0][1] << endl
                  << "Na última geração: " << geracaoAtual + 1 << endl;
             exit(EXIT_SUCCESS);
         }
