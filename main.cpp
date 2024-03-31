@@ -57,10 +57,10 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
             break;
         }
 
-        // Gera os individuos aletóriamente dentro do range de -2000 a 2000
+        // Gera os individuos aletóriamente dentro do range de -1000 a 1000
         for (int i = 0; i < quantidadeIndividuos; i++)
         {
-            individuos[i] = rand() % 4001 - 2000;
+            individuos[i] = rand() % 2001 - 1000;
         }
         break;
     }
@@ -68,74 +68,61 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
 
 void mutarIndividuo(int &individuo)
 {
-    int posicao = rand() % 32;
+    int posicao = rand() % 16;
     int taxaDeMutacao = (rand() % 2) == 0;
 
-    // Lembrar de pular a mutação do último bit da posição 31 pq ele controla o sinal do número
-    if (posicao != 31)
-    {
-        int mascaraDeBits = taxaDeMutacao << posicao;
+    int mascaraDeBits = taxaDeMutacao << posicao;
 
-        // Limpa o valor do bit na posição sorteada
-        individuo = individuo & ~(1 << posicao);
+    // Limpa o valor do bit na posição sorteada
+    individuo = individuo & ~(1 << posicao);
 
-        // Realiza a mutação
-        individuo = individuo | mascaraDeBits;
-    }
+    // Realiza a mutação
+    individuo = individuo | mascaraDeBits;
 }
 
-void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos)
+void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos, int taxaDeSeparacao)
 {
-    // pular primeiro individuo
-    for (int i = 1; i < quantidadeIndividuos; i++)
+    // int;
+    for (int i = 0; i < quantidadeIndividuos; i++)
     {
-        // int primeiroIndividuo = individuos[i - 1];
-        // int segundoIndividuo = individuos[i];
-        int primeiroIndividuo = 235497234;
-        int segundoIndividuo = 859234793;
-        int primeiroIndividuoPartes[2] = {primeiroIndividuo, primeiroIndividuo};
-        int segundoIndividuoPartes[2] = {segundoIndividuo, segundoIndividuo};
+        int mascaraPrimeiroIndividuo[2] = {individuos[i], individuos[i]};
+        int mascaraSegundoIndividuo[2] = {individuos[i + 1], individuos[i + 1]};
 
-        int mascaraNovaGeracaoPrimeiroIndividuo;
-        int mascaraNovaGeracaoSegundoIndividuo;
+        int novoFilhoPrimeiroIndividuo;
+        int novoFilhoSegundoIndividuo;
 
         // Parte da esquerda
         for (int i = 0; i < 16; i++)
         {
-            primeiroIndividuoPartes[0] = primeiroIndividuo & ~(1 << i);
-            segundoIndividuoPartes[0] = segundoIndividuo & ~(1 << i);
+            mascaraPrimeiroIndividuo[0] = mascaraPrimeiroIndividuo[0] & ~(1 << i);
+            mascaraSegundoIndividuo[0] = mascaraSegundoIndividuo[0] & ~(1 << i);
         }
 
         // Parte da direita
         for (int i = 16; i < 32; i++)
         {
-            primeiroIndividuoPartes[1] = primeiroIndividuo & ~(1 << i);
-            segundoIndividuoPartes[1] = segundoIndividuo & ~(1 << i);
+            mascaraPrimeiroIndividuo[1] = mascaraPrimeiroIndividuo[1] & ~(1 << i);
+            mascaraSegundoIndividuo[1] = mascaraSegundoIndividuo[1] & ~(1 << i);
         }
 
-        mascaraNovaGeracaoPrimeiroIndividuo = (segundoIndividuo << 0);
-        cout << bitset<32>(segundoIndividuo) << endl;
-        cout << bitset<32>(mascaraNovaGeracaoPrimeiroIndividuo) << endl;
-        mascaraNovaGeracaoSegundoIndividuo = (primeiroIndividuo << 0);
-        cout << bitset<32>(segundoIndividuo) << endl;
-        cout << bitset<32>(mascaraNovaGeracaoSegundoIndividuo) << endl;
+        novoFilhoPrimeiroIndividuo = mascaraPrimeiroIndividuo[0] | mascaraSegundoIndividuo[1];
+        novoFilhoSegundoIndividuo = mascaraSegundoIndividuo[0] | mascaraPrimeiroIndividuo[1];
 
-        mascaraNovaGeracaoPrimeiroIndividuo = (segundoIndividuo >> 16);
-        mascaraNovaGeracaoSegundoIndividuo = (primeiroIndividuo >> 16);
-
-        mutarIndividuo(individuos[i]);
+        individuos[i + taxaDeSeparacao] = novoFilhoPrimeiroIndividuo;
+        individuos[i + taxaDeSeparacao + 1] = novoFilhoSegundoIndividuo;
+        if (i != 0)
+            mutarIndividuo(individuos[i]);
     }
 }
 
 void separacao(int individuos[maxIndividuos], int quantidadeIndividuos)
 {
-    int taxaDeSeparação = quantidadeIndividuos * 0.5 + 1;
-    for (int i = taxaDeSeparação; i < quantidadeIndividuos; i++)
+    int taxaDeSeparacao = quantidadeIndividuos * 0.5 + 1;
+    for (int i = taxaDeSeparacao; i < quantidadeIndividuos; i++)
     {
         individuos[i] = 0;
     }
-    crossOver(individuos, quantidadeIndividuos);
-    cout << endl;
+    crossOver(individuos, quantidadeIndividuos, taxaDeSeparacao);
 }
 
 long long int validar(int a, int b, int c, int d, int e, int f, int x)
@@ -143,54 +130,39 @@ long long int validar(int a, int b, int c, int d, int e, int f, int x)
     return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
 }
 
-void bubbleSort(long long int resultados[maxIndividuos][2], int quantidadeDeIndividuos)
-{
-    for (int i = 0; i < quantidadeDeIndividuos - 1; i++)
-    {
-        for (int j = 0; j < quantidadeDeIndividuos - i - 1; j++)
-        {
-            // Se o individuo atual tiver um valor maior que o seguinte, eles trocam de posição.
-            if (resultados[j][0] > resultados[j + 1][0])
-            {
-                int tempValue = resultados[j][0];
-                int tempIndex = resultados[j][1];
-
-                resultados[j][0] = resultados[j + 1][0];
-                resultados[j][1] = resultados[j + 1][1];
-
-                resultados[j + 1][0] = tempValue;
-                resultados[j + 1][1] = tempIndex;
-            }
-        }
-    }
-}
-
 void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes)
 {
-    long long int resultados[maxIndividuos][2]; // Primeira dimensão é pros valores, a segunda é para o índice do individuo mais próximo da solução.
+    long long int resultado;
+    long long int resultadoMaisProximo = LLONG_MAX;
+    int geracaoMaisProxima = 0;
 
     for (int geracaoAtual = 0; geracaoAtual < numeroDeGeracoes; geracaoAtual++)
     {
         for (int individuoAtual = 0; individuoAtual < quantidadeIndividuos; individuoAtual++)
         {
-            resultados[individuoAtual][0] = abs(validar(a, b, c, d, e, f, individuos[individuoAtual]));
-            resultados[individuoAtual][1] = individuoAtual;
-            if (resultados[individuoAtual][0] == 0)
+            resultado = abs(validar(a, b, c, d, e, f, individuos[individuoAtual]));
+            if (resultado == 0)
             {
-                cout << "Valor do indivíduo: " << individuos[individuoAtual] << endl
+                cout << "\nO resultado foi encontrado!" << endl
+                     << "Valor do indivíduo: " << individuos[individuoAtual] << endl
                      << "Com o indivíduo: " << individuoAtual << endl
                      << "Na geração: " << geracaoAtual + 1 << endl;
                 exit(EXIT_SUCCESS);
+            }
+            // Garanto que o melhor resultado de cada geração seja sempre o primeiro individuo
+            if (resultado < resultadoMaisProximo)
+            {
+                individuos[0] = individuos[individuoAtual];
+                resultadoMaisProximo = resultado;
+                geracaoMaisProxima = geracaoAtual + 1;
             }
         }
 
         if (geracaoAtual == numeroDeGeracoes - 1)
         {
-            bubbleSort(resultados, quantidadeIndividuos);
-
-            cout << "Valor do indivíduo: " << individuos[resultados[0][1]] << endl
-                 << "Com o indivíduo: " << resultados[0][1] << endl
-                 << "Na última geração: " << geracaoAtual + 1 << endl;
+            cout << "\nValor do indivíduo: " << individuos[0] << endl
+                 << "Proximidade do resultado: " << resultadoMaisProximo << endl
+                 << "Na última geração: " << geracaoMaisProxima << endl;
             exit(EXIT_SUCCESS);
         }
         else
