@@ -7,7 +7,7 @@ using namespace std;
 
 const int maxIndividuos = 1000;
 
-void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int &d, int &e, int &f, int &quantidadeIndividuos, int &numeroDeGeracoes, int &taxaDeMutacao)
+void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int &d, int &e, int &f, int &quantidadeIndividuos, int &numeroDeGeracoes)
 {
     while (true)
     {
@@ -43,14 +43,6 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
         cout << "Insira o valor de f: " << endl;
         cin >> f;
 
-        cout << "Insira a taxa de mutação (0 a 100): " << endl;
-        cin >> taxaDeMutacao;
-        if (taxaDeMutacao > 100 || taxaDeMutacao < 0)
-        {
-            cout << "Por favor, insira um valor entre 0 e 100" << endl;
-            continue;
-        }
-
         switch (quantidadeIndividuos)
         {
         case 10:
@@ -73,10 +65,10 @@ void gerarIndividuos(int individuos[maxIndividuos], int &a, int &b, int &c, int 
     }
 }
 
-void mutarIndividuo(int &individuo, int taxaDeMutacao)
+void mutarIndividuo(int &individuo)
 {
     // Se eu mutar uma posicao muito significativa, demora pra encontrar o resultado
-    int posicao = round(taxaDeMutacao * 16 / 100.0);
+    int posicao = rand() % 16;
     int possibilidadeDeMutacao = (rand() % 2) == 0;
 
     int mascaraDeBits = possibilidadeDeMutacao << posicao;
@@ -88,11 +80,10 @@ void mutarIndividuo(int &individuo, int taxaDeMutacao)
     individuo = individuo | mascaraDeBits;
 }
 
-void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos, int taxaDeSeparacao, int taxaDeMutacao)
+void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos, int taxaDeSeparacao)
 {
     for (int i = 0; i < quantidadeIndividuos; i++)
     {
-        int taxaDeCrossOver = 0.5 * 32;
         int mascaraPrimeiroIndividuo[2] = {individuos[i], individuos[i]};
         int mascaraSegundoIndividuo[2] = {individuos[i + 1], individuos[i + 1]};
 
@@ -100,7 +91,7 @@ void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos, int taxa
         int novoFilhoSegundoIndividuo;
 
         // Bits da esquerda
-        for (int i = 0; i < taxaDeCrossOver; i++)
+        for (int i = 0; i < 16; i++)
         {
             mascaraPrimeiroIndividuo[0] = mascaraPrimeiroIndividuo[0] & ~(1 << i);
             mascaraSegundoIndividuo[0] = mascaraSegundoIndividuo[0] & ~(1 << i);
@@ -117,15 +108,19 @@ void crossOver(int individuos[maxIndividuos], int quantidadeIndividuos, int taxa
         novoFilhoPrimeiroIndividuo = mascaraPrimeiroIndividuo[0] | mascaraSegundoIndividuo[1];
         novoFilhoSegundoIndividuo = mascaraSegundoIndividuo[0] | mascaraPrimeiroIndividuo[1];
 
+        if (i != 0)
+        {
+            mutarIndividuo(novoFilhoPrimeiroIndividuo);
+            mutarIndividuo(novoFilhoSegundoIndividuo);
+        }
+
         // Adiciona os novos filhos
         individuos[i + taxaDeSeparacao] = novoFilhoPrimeiroIndividuo;
         individuos[i + taxaDeSeparacao + 1] = novoFilhoSegundoIndividuo;
-        if (i != 0)
-            mutarIndividuo(individuos[i], taxaDeMutacao);
     }
 }
 
-void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int taxaDeMutacao)
+void separacao(int individuos[maxIndividuos], int quantidadeIndividuos)
 {
     // esse + 1 é pro individuo[0] que se mantem através das gerações
     int taxaDeSeparacao = quantidadeIndividuos * 0.5 + 1;
@@ -135,15 +130,15 @@ void separacao(int individuos[maxIndividuos], int quantidadeIndividuos, int taxa
     {
         individuos[i] = 0;
     }
-    crossOver(individuos, quantidadeIndividuos, taxaDeSeparacao, taxaDeMutacao);
+    crossOver(individuos, quantidadeIndividuos, taxaDeSeparacao);
 }
 
 long long int validar(int a, int b, int c, int d, int e, int f, int x)
 {
-    return (a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f;
+    return ((a * pow(x, 5)) + (b * pow(x, 4)) + (c * pow(x, 3)) + (d * pow(x, 2)) + (e * x) + f);
 }
 
-void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes, int taxaDeMutacao)
+void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d, int e, int f, int quantidadeIndividuos, int numeroDeGeracoes)
 {
     long long int resultado;
     long long int resultadoMaisProximo = LLONG_MAX;
@@ -181,7 +176,7 @@ void validaSolucaoBoa(int individuos[maxIndividuos], int a, int b, int c, int d,
         }
         else
         {
-            separacao(individuos, quantidadeIndividuos, taxaDeMutacao);
+            separacao(individuos, quantidadeIndividuos);
         }
     }
 }
@@ -190,12 +185,12 @@ int main()
 {
     srand(time(0));
     int a, b, c, d, e, f;
-    int quantidadeIndividuos = 1000, numeroDeGeracoes = 0, taxaDeMutacao = 0;
+    int quantidadeIndividuos = 1000, numeroDeGeracoes = 0;
     int individuos[maxIndividuos];
 
-    gerarIndividuos(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes, taxaDeMutacao);
+    gerarIndividuos(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes);
 
-    validaSolucaoBoa(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes, taxaDeMutacao);
+    validaSolucaoBoa(individuos, a, b, c, d, e, f, quantidadeIndividuos, numeroDeGeracoes);
 
     return 0;
 }
